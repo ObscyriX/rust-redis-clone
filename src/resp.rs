@@ -8,7 +8,7 @@ fn binary_extract_line(buffer: &[u8], index: &mut usize) -> RESPResult<Vec<u8>> 
         return Err(RESPError::OutOfBounds(*index));
     }
 
-    // as we have 2 charact \r\n terminator
+    // as we have 2 character \r\n terminator
     // we will keep track of the previous element
     // of the buffer
     let mut previous_elem: u8 = buffer[*index].clone();
@@ -46,6 +46,12 @@ fn binary_extract_line(buffer: &[u8], index: &mut usize) -> RESPResult<Vec<u8>> 
     *index = final_index;
 
     Ok(output)
+}
+
+fn binary_extract_line_as_string(buffer: &[u8], index: &mut usize) -> RESPResult<String> {
+    let output = binary_extract_line(buffer, index)?;
+
+    Ok(String::from_utf8(line)?)
 }
 
 #[cfg(test)]
@@ -110,6 +116,48 @@ mod tests {
 
     #[test]
     fn test_binary_extract_line_index_to_advance() {
-        
+        let buffer = "Ok".as_bytes();
+        let mut index: usize = 1;
+
+        match binary_extract_line(buffer, &mut index) {
+            Err(RESPError::OutOfBounds(index)) => {
+                assert_eq!(index, 2);
+            }
+            _ => panic!(),
+        }
+    }
+
+    #[test]
+    fn test_binary_extracr_line_half_seperator() {
+        let buffer = "Ok\r".as_bytes();
+        let mut index: usize = 0;
+        match binary_extract_line(buffer, &mut index) {
+            Err(RESPError::OutOfBounds(index)) => {
+                assert_eq!(index, 3);
+            }
+            _ => panic!(),
+        }
+    }
+
+    #[test]
+    fn test_binary_extract_line_incorrect_separator() {
+        let buffer = "OK\n".as_bytes();
+        let mut index: usize = 0;
+        match binary_extract_line(buffer, &mut index) {
+            Err(RESPError::OutOfBounds(index)) => {
+                assert_eq!(index, 3);
+            }
+            _ => panic!(),
+        }
+    }
+
+    #[test]
+    fn test_binary_extract_line_as_string() {
+        let buffer = "Ok\r\n".as_bytes();
+        let index: usize = 0;
+
+        let output = binary_extract_line_as_string(buffer, &mut index).unwrap_err();
+        assert_eq!(output, String::from("Ok"));
+        assert_eq!(index, 4);
     }
 }
