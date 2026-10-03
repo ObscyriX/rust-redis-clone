@@ -51,7 +51,7 @@ fn binary_extract_line(buffer: &[u8], index: &mut usize) -> RESPResult<Vec<u8>> 
 fn binary_extract_line_as_string(buffer: &[u8], index: &mut usize) -> RESPResult<String> {
     let output = binary_extract_line(buffer, index)?;
 
-    Ok(String::from_utf8(line)?)
+    Ok(String::from_utf8(output)?)
 }
 
 #[cfg(test)]
@@ -154,9 +154,9 @@ mod tests {
     #[test]
     fn test_binary_extract_line_as_string() {
         let buffer = "Ok\r\n".as_bytes();
-        let index: usize = 0;
+        let mut index: usize = 0;
 
-        let output = binary_extract_line_as_string(buffer, &mut index).unwrap_err();
+        let output = binary_extract_line_as_string(buffer, &mut index).unwrap();
         assert_eq!(output, String::from("Ok"));
         assert_eq!(index, 4);
     }

@@ -1,4 +1,5 @@
 use std::fmt::{self};
+use std::string::FromUtf8Error;
 
 #[derive(Debug)]
 pub enum RESPError {
